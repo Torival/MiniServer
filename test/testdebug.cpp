@@ -1,0 +1,6 @@
+#include "../src/debug.h"
+
+int main(){
+    
+    return 0;
+}
