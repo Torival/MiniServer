@@ -8,51 +8,44 @@
 int openfd(int port){
     int listenfd;
     struct sockaddr_in serveraddr;
+    // 接收函数返回值，以检查是否运行正确
+    int ret;
 
-    if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-        log_err("socket init fail!\n");
-        return -1;
-    }    
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    check(listenfd < 0, "socket init fail!\n");
+    
     
     // 调用close(socket)一般不会立即关闭socket，而经历TIME_WAIT的过程。
     int optval = 1;
-    if(setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
-        (const void *)&optval , sizeof(int)) < 0){
-        log_err("set socket fail!\n");
-        return -1;
-    }
-
+    ret = setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
+        (const void *)&optval , sizeof(int));  
+    check(ret < 0, "set socket fail!\n");
+    
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET; 
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); 
     serveraddr.sin_port = htons((unsigned short)port);
 
-    if (bind(listenfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0){
-        log_err("socket bind fail!\n");
-        return -1;
-    }
+    ret = bind(listenfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
+    check(ret < 0, "socket bind fail!\n");
+    
+    ret = listen(listenfd, QUEUE_LEN);
+    check(ret < 0, "listen fail!\n");
 
-
-    if (listen(listenfd, QUEUE_LEN) < 0){
-        log_err("listen fail!\n");
-        return -1; 
-    }	       
+    return listenfd;
 }
 
 int set_noblock(int fd) {
     int flag = fcntl(fd, F_GETFL, 0);
     
-    if(flag == -1){
-        log_err("get fd flag error!\n");
-        return -1;
-    }
-
+    check(flag == -1, "get fd flag error!\n");
     flag |= O_NONBLOCK;
-    if(fcntl(fd, F_SETFL, flag) < 0){
-        log_err("set fd flag error!\n");
-        return -1;
-    }
+
+    int ret = fcntl(fd, F_SETFL, flag);
+    check(ret < 0, "set fd flag error!\n");
 
     return 0;
 }
+
+
 #endif

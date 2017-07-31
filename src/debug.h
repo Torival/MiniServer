@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+// 输出错误信息
 #define log_err(M, ...)                         \
     do{                                         \
         fprintf(stderr,                         \
@@ -10,7 +11,7 @@
         __FILE__, __LINE__, ##__VA_ARGS__);     \
     }while(0);                                  \
 
-
+// 输出运行相关信息
 #define log_info(M, ...)                        \
     do{                                         \
         fprintf(stderr,                         \
@@ -18,11 +19,13 @@
         __FILE__, __LINE__, ##__VA_ARGS__);     \
     }while(0);                                  \
 
-/*
-#define check(A, M, ...) if(!(A)) { log_err(M "\n", ##__VA_ARGS__);  }
-
-#define check_exit(A, M, ...) if(!(A)) { log_err(M "\n", ##__VA_ARGS__); exit(1);}
-
-#define check_debug(A, M, ...) if(!(A)) { debug(M "\n", ##__VA_ARGS__); }
-*/
+// 检查参数
+#define check(A, M, ...)                        \
+    do{                                         \
+        if(A){                                  \
+            log_err(M "\n", ##__VA_ARGS__);     \
+            return -1;                          \
+        }                                       \
+    }while(0);                                  \
+    
 #endif
