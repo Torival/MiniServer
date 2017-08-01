@@ -12,14 +12,14 @@ int openfd(int port){
     int ret;
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
-    check(listenfd < 0, "socket init fail!\n");
+    check_return(listenfd < 0, "socket init fail!\n");
     
     
     // 调用close(socket)一般不会立即关闭socket，而经历TIME_WAIT的过程。
     int optval = 1;
     ret = setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
         (const void *)&optval , sizeof(int));  
-    check(ret < 0, "set socket fail!\n");
+    check_return(ret < 0, "set socket fail!\n");
     
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET; 
@@ -27,10 +27,10 @@ int openfd(int port){
     serveraddr.sin_port = htons((unsigned short)port);
 
     ret = bind(listenfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
-    check(ret < 0, "socket bind fail!\n");
+    check_return(ret < 0, "socket bind fail!\n");
     
     ret = listen(listenfd, QUEUE_LEN);
-    check(ret < 0, "listen fail!\n");
+    check_return(ret < 0, "listen fail!\n");
 
     return listenfd;
 }
@@ -38,11 +38,11 @@ int openfd(int port){
 int set_noblock(int fd) {
     int flag = fcntl(fd, F_GETFL, 0);
     
-    check(flag == -1, "get fd flag error!\n");
+    check_return(flag == -1, "get fd flag error!\n");
     flag |= O_NONBLOCK;
 
     int ret = fcntl(fd, F_SETFL, flag);
-    check(ret < 0, "set fd flag error!\n");
+    check_return(ret < 0, "set fd flag error!\n");
 
     return 0;
 }

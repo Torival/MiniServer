@@ -21,11 +21,14 @@
 
 // 检查参数
 #define check(A, M, ...)                        \
-    do{                                         \
-        if(A){                                  \
-            log_err(M "\n", ##__VA_ARGS__);     \
-            return -1;                          \
-        }                                       \
-    }while(0);                                  \
-    
+    if(A){                                      \
+        log_err(M "\n", ##__VA_ARGS__);         \
+    }                                           \
+
+// 检查参数, 并返回
+#define check_return(A, M, ...)                 \
+    if(A){                                      \
+        log_err(M "\n", ##__VA_ARGS__);         \
+        return -1;                              \
+    }                                           \  
 #endif
