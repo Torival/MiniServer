@@ -29,7 +29,7 @@ class Threadpool {
         ~Threadpool();
 
         int  init(int thread_num = THREADNUM);
-        bool destory();
+        void destroy();
         bool add_tesk(void *(*run)(void *arg), void *arg);
 
     private:

@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "threadpool.h"
 #include "debug.h"
 
@@ -11,9 +12,6 @@ Threadpool::~Threadpool(){
 int Threadpool::init(int thread_num){
     int ret = cdt.init();
     check_return(ret != 0, "Condition init fail\n");
-
-    head = NULL;
-    tail = NULL;
 
     // 初始化线程表
     threads = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);
@@ -31,7 +29,7 @@ int Threadpool::init(int thread_num){
     return 0;
 }
 
-void Threadpool::destory(){
+void Threadpool::destroy(){
     // 线程池已销毁过
     if(stop)
         return;
@@ -58,7 +56,7 @@ bool Threadpool::add_tesk(void *(*run)(void *arg), void *arg){
 
     // 添加到任务队列
     cdt.lock();
-    tesk_queue.push_back(tesk);
+    tesk_queue.push(tesk);
     cdt.unlock();
     cdt.signal();
 }

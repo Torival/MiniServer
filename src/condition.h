@@ -11,7 +11,7 @@ class Condition {
         
         // 初始化, 销毁
         int init();
-        int destory();
+        int destroy();
 
         // 加锁, 解锁
         int lock();

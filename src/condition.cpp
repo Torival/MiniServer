@@ -12,10 +12,10 @@ Condition::~Condition() {
 int Condition::init() {
     int ret;
 
-    ret = pthread_mutex_init(&mutex);
+    ret = pthread_mutex_init(&mutex, NULL);
     check_return(ret != 0, "mutex init fail\n");
 
-    ret = pthread_cond_init(&cond);
+    ret = pthread_cond_init(&cond, NULL);
     check_return(ret != 0, "cond init fail\n");
 
     return 0;

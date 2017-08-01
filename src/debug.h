@@ -30,5 +30,6 @@
     if(A){                                      \
         log_err(M "\n", ##__VA_ARGS__);         \
         return -1;                              \
-    }                                           \  
+    }                                           \
+
 #endif
