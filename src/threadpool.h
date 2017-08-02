@@ -47,12 +47,6 @@ class Threadpool {
         // 最大线程数
         int max_threads;    
         
-        // 空闲线程数
-        int free_threads;
-        
-        // 当前拥有的线程数
-        int count_thread;
-        
         // 退出标记
         volatile bool stop;
 

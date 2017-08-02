@@ -22,8 +22,6 @@ int Threadpool::init(int thread_num){
     }
 
     max_threads = thread_num;
-    free_threads = 0;
-    count_thread = 0;
     stop = false;
     
     return 0;
@@ -33,20 +31,21 @@ void Threadpool::destroy(){
     // 线程池已销毁过
     if(stop)
         return;
-
     
     stop = 1;
     cdt.broadcast();
 
     cdt.lock();
+    
     // 销毁所有线程
-    for(int i = 0; i < count_thread; ++i){
+    for(int i = 0; i < max_threads; ++i){
         pthread_join(threads[i], NULL);
     }
 
     // 销毁线程表
     free(threads);
     threads = NULL;
+    
     cdt.unlock();
 
     // 释放状态
