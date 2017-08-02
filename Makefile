@@ -33,7 +33,7 @@ objs : $(OBJS)
 
 clean :
 	@$(RM-F) *.o
-	@$(RM-F) *.d
+	@$(RM-F) *.out
 veryclean: clean
 	@$(RM-F) $(EXECUTABLE)
 
@@ -47,18 +47,6 @@ rebuild: veryclean all
 $(EXECUTABLE) : $(OBJS)
 	$(CC) -o $(EXECUTABLE) $(OBJS) $(addprefix -L,$(LIBDIR)) $(addprefix -l,$(LIBS))
 
-info:
-	@echo -e '------------src file-----------'
-	@echo $(SRCS)
-	@echo -e '\n------------obj file-----------'
-	@echo $(OBJS)
-	@echo -e '\n------------deps file-----------'
-	@echo $(DEPS)
-	@echo -e '\n------------miss deps file-----------'
-	@echo $(MISSING_DEPS)
-#	@echo -e '\n------------miss deps file-----------'
-#	@echo $(MISSING_DEPS_SOURCES)                  
-
 threadpool.o: ./src/threadpool.cpp ./src/threadpool.h 
 	$(CC) -c ./src/threadpool.cpp
 
@@ -68,5 +56,5 @@ condition.o: ./src/condition.cpp ./src/condition.h
 threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
 	$(CC) -c ./test/threadpooltest.cpp
 
-threadpooltest: threadpooltest.o threadpool.o condition.o
-	$(CC) -o threadpooltest threadpooltest.o threadpool.o condition.o $(LIBS)
+threadpooltest.out: threadpooltest.o threadpool.o condition.o
+	$(CC) -o threadpooltest.out threadpooltest.o threadpool.o condition.o $(LIBS)
