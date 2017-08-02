@@ -32,8 +32,8 @@ deps : $(DEPS)
 objs : $(OBJS)
 
 clean :
-	@$(RM-F) *.o
-	@$(RM-F) *.out
+	rm -f *.o
+	rm -f *.out
 veryclean: clean
 	@$(RM-F) $(EXECUTABLE)
 
@@ -55,6 +55,12 @@ condition.o: ./src/condition.cpp ./src/condition.h
 
 threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
 	$(CC) -c ./test/threadpooltest.cpp
+
+server.o:./src/server.cpp ./src/util.h
+	$(CC) -c ./src/server.cpp
+
+server.out: server.o
+	$(CC) -o server.out server.o
 
 threadpooltest.out: threadpooltest.o threadpool.o condition.o
 	$(CC) -o threadpooltest.out threadpooltest.o threadpool.o condition.o $(LIBS)
