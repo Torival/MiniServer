@@ -17,9 +17,8 @@ class Condition {
         int lock();
         int unlock();
     
-        // 等待, 固定时间等待
+        // 等待
         int wait();
-        int timewait(const struct timespec *abstime);
         
         //唤醒一个, 唤醒所有
         int signal();

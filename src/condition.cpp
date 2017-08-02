@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <string.h>
 #include "condition.h"
 #include "debug.h"
 
@@ -24,12 +26,12 @@ int Condition::init() {
 int Condition::destroy() {
     int ret;
 
-    ret = pthread_mutex_destroy(&mutex);
-    check_return(ret != 0, "mutex destroy fail\n");
-
     ret = pthread_cond_destroy(&cond);
-    check_return(ret != 0, "cond destroy fail\n");
+    check_return(ret != 0, "cond destroy fail, error:%d, %s\n", ret, strerror(ret));
 
+    ret = pthread_mutex_destroy(&mutex);
+    check_return(ret != 0, "mutex destroy fail, error:%d, %s\n", ret, strerror(ret));
+    
     return 0;
 }
 
@@ -43,10 +45,6 @@ int Condition::unlock(){
 
 int Condition::wait(){
     return pthread_cond_wait(&cond, &mutex);
-}
-
-int Condition::timewait(const struct timespec *abstime){
-    return pthread_cond_timewait(&cond, &mutex, abstime);
 }
 
 int Condition::signal(){

@@ -62,8 +62,11 @@ info:
 threadpool.o: ./src/threadpool.cpp ./src/threadpool.h 
 	$(CC) -c ./src/threadpool.cpp
 
-threadpooltest.o:threadpooltest.cpp threadpool.h
-	$(CC) -c threadpooltest.o
+condition.o: ./src/condition.cpp ./src/condition.h 
+	$(CC) -c ./src/condition.cpp
 
-threadpooltest: threadpooltest.o threadpool.o
-	$(CC) -o threadpooltest threadpooltest.o threadpool.o
+threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
+	$(CC) -c ./test/threadpooltest.cpp
+
+threadpooltest: threadpooltest.o threadpool.o condition.o
+	$(CC) -o threadpooltest threadpooltest.o threadpool.o condition.o $(LIBS)

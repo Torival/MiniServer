@@ -33,7 +33,7 @@ class Threadpool {
         bool add_tesk(void *(*run)(void *arg), void *arg);
 
     private:
-        void *thread_routine(void *arg);
+        static void *thread_routine(void *arg);
 
         // 状态
         Condition cdt;

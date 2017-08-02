@@ -34,9 +34,11 @@ void Threadpool::destroy(){
     if(stop)
         return;
 
+    
     stop = 1;
     cdt.broadcast();
 
+    cdt.lock();
     // 销毁所有线程
     for(int i = 0; i < count_thread; ++i){
         pthread_join(threads[i], NULL);
@@ -45,7 +47,8 @@ void Threadpool::destroy(){
     // 销毁线程表
     free(threads);
     threads = NULL;
-    
+    cdt.unlock();
+
     // 释放状态
     cdt.destroy();
 }
@@ -62,30 +65,29 @@ bool Threadpool::add_tesk(void *(*run)(void *arg), void *arg){
 }
 
 void* Threadpool::thread_routine(void *arg){
+    Threadpool* pool = static_cast<Threadpool*>(arg);
     Tesk tesk;
     
-    while(!stop) {
+    while(!pool->stop) {
 
-        cdt.lock();
-        while(tesk_queue.empty() && !stop){
-            cdt.wait();
+        pool->cdt.lock();
+        while(pool->tesk_queue.empty() && !pool->stop){
+            pool->cdt.wait();
         }
 
         // 如果线程池停止，解锁，退出
-        if(stop){
-            cdt.unlock();
+        if(pool->stop){
+            pool->cdt.unlock();
             break;
         }
 
-        // if(tesk_queue.empty())
-        //     continue;
-
-        tesk = tesk_queue.front();
-        tesk_queue.pop();
+        tesk = pool->tesk_queue.front();
+        pool->tesk_queue.pop();
         
-        cdt.unlock();
+        pool->cdt.unlock();
         
         // 执行回调函数
         tesk.callbackfunc(tesk.args);
     }
+    return NULL;
 }
