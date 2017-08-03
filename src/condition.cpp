@@ -15,7 +15,7 @@ int Condition::init() {
     int ret;
 
     ret = pthread_mutex_init(&mutex, NULL);
-    check_return(ret != 0, "mutex init fail\n");
+    check_return(ret != 0, "mutex init fail");
 
     ret = pthread_cond_init(&cond, NULL);
     check_return(ret != 0, "cond init fail\n");
@@ -27,10 +27,10 @@ int Condition::destroy() {
     int ret;
 
     ret = pthread_cond_destroy(&cond);
-    check_return(ret != 0, "cond destroy fail, error:%d, %s\n", ret, strerror(ret));
+    check_return(ret != 0, "cond destroy fail, error:%d, %s", ret, strerror(ret));
 
     ret = pthread_mutex_destroy(&mutex);
-    check_return(ret != 0, "mutex destroy fail, error:%d, %s\n", ret, strerror(ret));
+    check_return(ret != 0, "mutex destroy fail, error:%d, %s", ret, strerror(ret));
     
     return 0;
 }

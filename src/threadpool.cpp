@@ -11,7 +11,7 @@ Threadpool::~Threadpool(){
 
 int Threadpool::init(int thread_num){
     int ret = cdt.init();
-    check_return(ret != 0, "Condition init fail\n");
+    check_return(ret != 0, "Condition init fail");
 
     // 初始化线程表
     threads = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);

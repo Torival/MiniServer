@@ -19,6 +19,7 @@
 #include "util.h"
 
 #define MAXEPOLLEVENT 1000 
+
 int main(int argc, char* argv[]) {
     int listenfd;   
     int epfd;
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
     signal(SIGPIPE, SIG_IGN);  
     
     memset(&clientaddr, 0, sizeof(struct sockaddr_in));
-    listenfd = openfd(8080);
+    listenfd = openfd(8081);
     set_noblock(listenfd);
 
     // 生成用于处理accept的epoll专用的文件描述符
@@ -46,14 +47,15 @@ int main(int argc, char* argv[]) {
     ev.events = EPOLLIN | EPOLLET;
     // 注册epoll事件
     epoll_ctl(epfd, EPOLL_CTL_ADD, listenfd, &ev);
-
+    int index = 0;
     while(true) {
+        index++;
         // 等待epoll事件的发生
         nfds = epoll_wait(epfd, ep_events, MAXEPOLLEVENT, 500);
 
         // 处理所发生的所有事件
         for(int i = 0; i < nfds; ++i){
-
+            log_info("count--> %d", index);
             // 文件描述符发生错误，不可读
             if((ep_events[i].events & EPOLLERR) ||
                (ep_events[i].events & EPOLLHUP) ||
@@ -69,10 +71,10 @@ int main(int argc, char* argv[]) {
                 int connfd ;
                 socklen_t client_len;
                 connfd = accept(listenfd, (sockaddr *)&clientaddr, &client_len);
-                check_return(connfd < 0, "accept error!\n");
+                check_return(connfd < 0, "accept error!");
 
                 int ret = set_noblock(connfd);
-                check(ret == 0, "make_socket_non_blocking");
+                check(ret != 0, "make socket no block error");
                 
                 log_info("new connection fd:%d", connfd);
                 
@@ -90,7 +92,8 @@ int main(int argc, char* argv[]) {
                 while((size = read(sockfd, line, 1024)) > 0){
                     count += size;
                 } 
-                log_info("read data:%dbytes from fd:%d\n", count, sockfd);
+                log_info("read data:%dbytes from fd:%d", count, sockfd);
+                log_info("data:%s", line);
 
                 ev.data.fd = sockfd;
                 ev.events = EPOLLOUT | EPOLLET;

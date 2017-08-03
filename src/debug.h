@@ -22,13 +22,13 @@
 // 检查参数
 #define check(A, M, ...)                        \
     if(A){                                      \
-        log_err(M "\n", ##__VA_ARGS__);         \
+        log_err(M , ##__VA_ARGS__);             \
     }                                           \
 
 // 检查参数, 并返回
 #define check_return(A, M, ...)                 \
     if(A){                                      \
-        log_err(M "\n", ##__VA_ARGS__);         \
+        log_err(M , ##__VA_ARGS__);             \
         return -1;                              \
     }                                           \
 
