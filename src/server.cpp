@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
                     count += size;
                 } 
                 log_info("read data:%dbytes from fd:%d", count, sockfd);
-                log_info("data:%s", line);
+                printf("---------------------\n%s\n---------------------\n", line);
 
                 ev.data.fd = sockfd;
                 ev.events = EPOLLOUT | EPOLLET;

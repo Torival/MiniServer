@@ -53,8 +53,8 @@ threadpool.o: ./src/threadpool.cpp ./src/threadpool.h
 condition.o: ./src/condition.cpp ./src/condition.h 
 	$(CC) -c ./src/condition.cpp
 
-threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
-	$(CC) -c ./test/threadpooltest.cpp
+http.o: ./src/http.cpp ./src/http.h 
+	$(CC) -c ./src/http.cpp
 
 server.o:./src/server.cpp ./src/util.h
 	$(CC) -c ./src/server.cpp
@@ -62,5 +62,14 @@ server.o:./src/server.cpp ./src/util.h
 server.out: server.o
 	$(CC) -o server.out server.o
 
+threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
+	$(CC) -c ./test/threadpooltest.cpp
+
 threadpooltest.out: threadpooltest.o threadpool.o condition.o
 	$(CC) -o threadpooltest.out threadpooltest.o threadpool.o condition.o $(LIBS)
+
+testrequest.o:./test/testrequest.cpp ./src/testrequest.h
+	$(CC) -c ./test/testrequest.cpp
+
+testrequest.out: testrequest.o http.o
+	$(CC) -o testrequest.out testrequest.o http.o
