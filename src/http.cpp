@@ -55,26 +55,26 @@ HttpRequest::HttpRequest(char* _data):pct(NULL){
             value = cur;
             while(1){
                 if(*cur == ' ' || *cur == '&')
-					break; 
-				++cur;
+                    break; 
+                ++cur;
 			} 
             valuelen = cur - value;
             pct->param_table[string(key, keylen)] = string(value, valuelen);
         }
     }
     
+    // 初始化主机IP
     cur = strstr(cur,"Host");
     cur += 6;
-    
-    // 初始化主机IP
     pct->host = cur;
     while(*cur != ':')
     	++cur;
     pct->hostlen = cur - pct->host;
     
-    ++cur;
+    
     
     // 初始化主机端口
+    ++cur;
     pct->port = atoi(cur);
 }
 
