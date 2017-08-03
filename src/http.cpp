@@ -57,7 +57,7 @@ HttpRequest::HttpRequest(char* _data):pct(NULL){
                 if(*cur == ' ' || *cur == '&')
                     break; 
                 ++cur;
-			} 
+            } 
             valuelen = cur - value;
             pct->param_table[string(key, keylen)] = string(value, valuelen);
         }
