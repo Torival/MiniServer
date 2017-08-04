@@ -14,6 +14,7 @@ INCLUDES:=./src
 SRCDIR:=./src   ./test          
 
 CC:=g++
+CC += -std=c++11
 CFLAGS := -g -Wall -O3
 CPPFLAGS := $(CFLAGS)
 CPPFLAGS += $(addprefix -I,$(INCLUDES))
@@ -59,8 +60,8 @@ http.o: ./src/http.cpp ./src/http.h
 server.o:./src/server.cpp ./src/util.h
 	$(CC) -c ./src/server.cpp
 
-server.out: server.o
-	$(CC) -o server.out server.o
+server.out: server.o http.o
+	$(CC) -o server.out server.o http.o
 
 threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
 	$(CC) -c ./test/threadpooltest.cpp

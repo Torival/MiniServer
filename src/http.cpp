@@ -1,5 +1,11 @@
-#include <iostream>
+#include <stdlib.h>
+#include <string>
+#include <unistd.h>
+
+#include "debug.h"
 #include "http.h"
+
+using std::to_string;
 
 void RequestPacket::init() {
     char* cur = data;
@@ -28,7 +34,7 @@ void RequestPacket::init() {
     uri = cur;
     while(*cur != '?' && *cur != ' ')
         ++cur;
-    rilen = cur - uri;
+    urilen = cur - uri;
 	
     // 初始化参数表
     if(*cur == '?'){
@@ -149,9 +155,11 @@ HttpResponse::~HttpResponse(){
 
 }
 
-void HttpResponse::response_file(){
-    
-    if(access(path, F_OK) == 0)
+void HttpResponse::response_file(){   
+    if(path == "")
+        response_404();
+
+    if(access(path.c_str(), F_OK) == 0)
         response_200();
     else
         response_404();    
@@ -160,32 +168,31 @@ void HttpResponse::response_file(){
 
 void HttpResponse::response_400(){
     
-    string head, content;
+    
+}
+
+void HttpResponse::response_404(){
+    string head;
     char buf[4096];
     int count = 0;
 
     FILE* txt = fopen("./web/404.html", "r");
-    check_return(txt == NULL, "open file fail");
-    
+    check(txt == NULL, "open file fail");
 
-    while(!feof(txt) && fgets(buf, sizeof(buf), txt)){
-        count += strlen(buf);
-        content += buf;
-    }
     
+    // printf("----------------------");
     head  = "HTTP/1.1 404 Not Found\r\n";
 	head += "Server: Mini_Server\r\n";
 	head += "Content-Type: text/html; charset=UTF-8\r\n";
-	head += "Content-Length: " + count + "\r\n",
 	head += "Connection: keep-alive\r\n";
 	head += "\r\n";
 
     write(fd, head.c_str(), head.length());
-    write(fd, content.c_str(), content.length());
-}
-
-void HttpResponse::response_404(){
     
+    while(!feof(txt) && fgets(buf, sizeof(buf) - 1, txt)){
+        buf[sizeof(buf) - 1] = '\0';
+        write(fd, buf, strlen(buf));
+    }
 }
 
 void HttpResponse::response_501(){
@@ -201,8 +208,8 @@ void HttpResponse::response_200(){
     char buf[4096];
     int count = 0;
 
-    FILE* txt = fopen(path, "r");
-    check_return(txt == NULL, "open file fail");
+    FILE* txt = fopen(path.c_str(), "r");
+    check(txt == NULL, "open file fail");
     
 
     while(!feof(txt) && fgets(buf, sizeof(buf), txt)){
@@ -213,8 +220,8 @@ void HttpResponse::response_200(){
     head  = "HTTP/1.1 200 OK\r\n";
 	head += "Server: Mini_Server\r\n";
 	head += "Content-Type: text/html; charset=UTF-8\r\n";
-	head += "Content-Length: " + count + "\r\n",
-	head += "Connection: keep-alive\r\n";
+	head += "Content-Length: " + count,
+	head += "\r\nConnection: keep-alive\r\n";
 	head += "\r\n";
 
     write(fd, head.c_str(), head.length());

@@ -17,6 +17,7 @@
 
 #include "debug.h"
 #include "util.h"
+#include "http.h"
 
 #define MAXEPOLLEVENT 1000 
 
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
     signal(SIGPIPE, SIG_IGN);  
     
     memset(&clientaddr, 0, sizeof(struct sockaddr_in));
-    listenfd = openfd(8081);
+    listenfd = openfd(8080);
     set_noblock(listenfd);
 
     // 生成用于处理accept的epoll专用的文件描述符
@@ -47,16 +48,15 @@ int main(int argc, char* argv[]) {
     ev.events = EPOLLIN | EPOLLET;
     // 注册epoll事件
     epoll_ctl(epfd, EPOLL_CTL_ADD, listenfd, &ev);
-    int index = 0;
+    
     while(true) {
-        index++;
         // 等待epoll事件的发生
         nfds = epoll_wait(epfd, ep_events, MAXEPOLLEVENT, 500);
 
         // 处理所发生的所有事件
         for(int i = 0; i < nfds; ++i){
-            log_info("count--> %d", index);
-            // 文件描述符发生错误，不可读
+            
+             // 文件描述符发生错误，不可读
             if((ep_events[i].events & EPOLLERR) ||
                (ep_events[i].events & EPOLLHUP) ||
                (!(ep_events[i].events & EPOLLIN))) {
@@ -80,36 +80,60 @@ int main(int argc, char* argv[]) {
                 
                 ev.data.fd = connfd;
                 ev.events = EPOLLIN | EPOLLET;
-                epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);
-            } else if(ep_events[i].events & EPOLLIN){
-                // 接收到数据
+                epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);  
+            } else {
                 int sockfd;
-                char line[1024] = {0};
+                char http_data[4096] = {0};
                 int size = 0;
-                int count = 0;
 
-                sockfd = ep_events[i].data.fd;
-                while((size = read(sockfd, line, 1024)) > 0){
-                    count += size;
-                } 
-                log_info("read data:%dbytes from fd:%d", count, sockfd);
-                printf("---------------------\n%s\n---------------------\n", line);
-
-                ev.data.fd = sockfd;
-                ev.events = EPOLLOUT | EPOLLET;
-                epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev);
-            } else if(ep_events[i].events & EPOLLOUT) {
-                // 有数据发送
-                int sockfd;
-                char line[1024] = {"hello world!\n"};
-
-                sockfd = ep_events[i].data.fd;
-                write(sockfd, line, 1024);
-
-                ev.data.fd = sockfd;
-                ev.events = EPOLLIN | EPOLLET;
-                epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd, &ev);
+                sockfd = ep_events[i].data.fd;               
+                size = read(sockfd, http_data, 4096);
+                
+                if(size == 0)
+                    break;
+                
+                HttpRequest rqst(http_data);
+                HttpResponse rsps(sockfd, rqst.getUri());
+                log_info("read data:%dbytes from fd:%d", size, sockfd);    
+                
+                rsps.response_file();
+                
+                // ev.data.fd = sockfd;
+                // ev.events = EPOLLOUT | EPOLLET;
+                // epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd, &ev);
+                
             }
+            // } else if(ep_events[i].events & EPOLLIN){
+            //     // 接收到数据
+            //     int sockfd;
+            //     char line[4096] = {0};
+            //     int size = 0;
+
+            //     sockfd = ep_events[i].data.fd;               
+            //     size = read(sockfd, line, 4096);
+
+            //     if(size == 0){
+            //         close(sockfd);
+            //         return 0;
+            //     }
+
+            //     log_info("read data:%dbytes from fd:%d", size, sockfd);
+            //     printf("---------------------\n%s\n---------------------\n", line);
+
+            //     ev.data.fd = sockfd;
+            //     ev.events = EPOLLOUT | EPOLLET;
+            //     epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd, &ev);
+            // } else if(ep_events[i].events & EPOLLOUT) {
+            //     // 有数据发送
+            //     int sockfd;
+            //     sockfd = ep_events[i].data.fd;
+            //     HttpResponse rsps(sockfd, "/sd/");
+            //     rsps.response_file();
+
+            //     ev.data.fd = sockfd;
+            //     ev.events = EPOLLIN | EPOLLET;
+            //     epoll_ctl(epfd, EPOLL_CTL_MOD, sockfd, &ev);
+            // }
         }  
     }   
 
