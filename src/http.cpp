@@ -102,10 +102,10 @@ int HttpRequest::readData(const int fd){
     char data[4096];
 
     int size = read(fd, data, 4096);
-    log_info("%d\n%s\n", size, data);
+    //log_info("%d\n%s", size, data);
     if(size == 0 || size == -1) 
         return size;
-    
+    data[size] = '\0';
     pct = new RequestPacket(data);
     return size;
 }
@@ -204,9 +204,9 @@ void HttpResponse::response_404(){
     write(fd, head.c_str(), head.length());
     
     while(!feof(txt) && fgets(buf, sizeof(buf) - 1, txt)){
-        buf[sizeof(buf) - 1] = '\0';
         write(fd, buf, strlen(buf));
     }
+
     fclose(txt);
 }
 

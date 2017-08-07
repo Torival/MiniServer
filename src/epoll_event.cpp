@@ -77,23 +77,23 @@ int start_server() {
             } else if(ep_events[i].events & EPOLLIN){
                 int sockfd = ep_events[i].data.fd;
 
-                // HttpRequest rqst;
-	            // int size = rqst.readData(sockfd);
-                // log_info("from socket:%d read data size: %d", sockfd, size); 
+                HttpRequest rqst;
+	            int size = rqst.readData(sockfd);
+                log_info("from socket:%d read data size: %d", sockfd, size); 
 
-                // if(size == 0){
-                //     close(sockfd); 
-                //     break;
-                // }
+                if(size == 0){
+                    close(sockfd); 
+                    break;
+                }
                 
-                // if(size == -1 && errno == EAGAIN)
-                //     break;
+                if(size == -1 && errno == EAGAIN)
+                    break;
 
-                // log_info("thread ID:%lu is working", (pthread_t)pthread_self());
-                // HttpResponse rsps(sockfd, rqst.getUri());
-                // rsps.response_file();
-                // close(sockfd); 
-                pool.add_tesk(epoll_callback, (void*)&sockfd);     
+                log_info("thread ID:%lu is working", (pthread_t)pthread_self());
+                HttpResponse rsps(sockfd, rqst.getUri());
+                rsps.response_file();
+                close(sockfd); 
+                // pool.add_tesk(epoll_callback, (void*)&sockfd);     
             }
         } // end of epoll wait
     }   
