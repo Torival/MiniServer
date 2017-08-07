@@ -64,13 +64,9 @@ void RequestPacket::init() {
     cur = strstr(cur,"Host");
     cur += 6;
     host = cur;
-    while(*cur != ':')
+    while(*cur != '\r')
     	++cur;
     hostlen = cur - host;
-    
-    // 初始化主机端口
-    ++cur;
-    port = atoi(cur);
 
     // 从URI中，初始化请求对象
     if(obj == NULL){
@@ -94,8 +90,24 @@ HttpRequest::HttpRequest(const char* _data):pct(NULL){
     pct = new RequestPacket(_data);
 }
 
+HttpRequest::HttpRequest():pct(NULL){
+
+}
+
 HttpRequest::~HttpRequest(){
     delete pct;
+}
+
+int HttpRequest::readData(const int fd){
+    char data[4096];
+
+    int size = read(fd, data, 4096);
+    log_info("%d\n%s\n", size, data);
+    if(size == 0 || size == -1) 
+        return size;
+    
+    pct = new RequestPacket(data);
+    return size;
 }
 
 string HttpRequest::getUri(){
@@ -141,14 +153,16 @@ map<string, string> HttpRequest::getParameterMap(){
 }
 
 
-HttpResponse::HttpResponse(int _fd, const string& _path){
-    fd = _fd;
-    path = "./web" + _path;
+HttpResponse::HttpResponse(int _fd, const string& _path):HttpResponse(_fd, _path.c_str()){
+
 }
 
 HttpResponse::HttpResponse(int _fd, const char* _path){
-    fd = fd;
+    fd = _fd;
     path = "./web" + string(_path);
+    
+    if(path == "./web/")
+        path += "index.html";
 }
 
 HttpResponse::~HttpResponse(){
@@ -193,6 +207,7 @@ void HttpResponse::response_404(){
         buf[sizeof(buf) - 1] = '\0';
         write(fd, buf, strlen(buf));
     }
+    fclose(txt);
 }
 
 void HttpResponse::response_501(){

@@ -1,5 +1,5 @@
 # 可执行文件名
-EXECUTABLE := main
+EXECUTABLE := server
 
 # 静态库目录    
 LIBDIR:=     
@@ -26,6 +26,9 @@ DEPS := $(patsubst %.o,%.d,$(OBJS))
 MISSING_DEPS := $(filter-out $(wildcard $(DEPS)),$(DEPS))
 #MISSING_DEPS_SOURCES := $(wildcard $(patsubst %.d,%.cpp,$(MISSING_DEPS)))
 
+server.out: server.o http.o threadpool.o condition.o http.o epoll_event.o
+	$(CC) -o server.out server.o http.o threadpool.o condition.o epoll_event.o $(LIBS)
+
 all: $(EXECUTABLE)
 
 deps : $(DEPS)
@@ -48,6 +51,7 @@ rebuild: veryclean all
 $(EXECUTABLE) : $(OBJS)
 	$(CC) -o $(EXECUTABLE) $(OBJS) $(addprefix -L,$(LIBDIR)) $(addprefix -l,$(LIBS))
 
+
 threadpool.o: ./src/threadpool.cpp ./src/threadpool.h 
 	$(CC) -c ./src/threadpool.cpp
 
@@ -57,12 +61,13 @@ condition.o: ./src/condition.cpp ./src/condition.h
 http.o: ./src/http.cpp ./src/http.h 
 	$(CC) -c ./src/http.cpp
 
-server.o:./src/server.cpp ./src/util.h
+epoll_event.o:./src/epoll_event.cpp ./src/epoll_event.h ./src/threadpool.h
+	$(CC) -c ./src/epoll_event.cpp
+
+server.o:src/server.cpp src/epoll_event.h src/threadpool.h \
+ src/condition.h src/debug.h src/http.h
 	$(CC) -c ./src/server.cpp
-
-server.out: server.o http.o
-	$(CC) -o server.out server.o http.o
-
+	
 threadpooltest.o:./test/threadpooltest.cpp ./src/threadpool.h
 	$(CC) -c ./test/threadpooltest.cpp
 

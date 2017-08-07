@@ -1,5 +1,5 @@
-#ifndef __MINISERVER_HTTPREQUEST_H
-#define __MINISERVER_HTTPREQUEST_H
+#ifndef __MINISERVER_HTTP_H
+#define __MINISERVER_HTTP_H
 
 #include <map>
 #include <string>
@@ -76,10 +76,13 @@ struct RequestPacket{
 
 class HttpRequest{
     public:
+        HttpRequest();
         HttpRequest(const char* data);
         HttpRequest(const string& data);
         ~HttpRequest();
         
+        int readData(const int fd);
+
         string getUri();
         string getRequestObj();
 
