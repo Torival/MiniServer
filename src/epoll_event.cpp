@@ -71,12 +71,11 @@ int start_server() {
                     log_info("new connection fd:%d", connfd);
                     
                     ev.data.fd = connfd;
-                    ev.events = EPOLLIN | EPOLLET | EPOLLONESHOT;;
+                    ev.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
                     epoll_ctl(epfd, EPOLL_CTL_ADD, connfd, &ev);
                 }  
             } else if(ep_events[i].events & EPOLLIN){
                 int sockfd = ep_events[i].data.fd;
-
                 HttpRequest rqst;
 	            int size = rqst.readData(sockfd);
                 log_info("from socket:%d read data size: %d", sockfd, size); 
@@ -145,20 +144,13 @@ int set_noblock(int fd) {
 
 void* epoll_callback(void *arg) {
     int sockfd = *(int*)arg;            
-	HttpRequest rqst;
-	int size = rqst.readData(sockfd);
+    HttpRequest rqst;
 
-    log_info("from socket:%d read data size: %d", sockfd, size); 
-
-    if(size == 0){
-        close(sockfd); 
-        return NULL;
-    }
-    
-    if(size == -1 && errno == EAGAIN)
+    int ret = rqst.readData(sockfd);
+    if(ret == -1)
         return NULL;
 
-	log_info("thread ID:%lu is working", (pthread_t)pthread_self());
+	log_info("thread ID:%lu", (pthread_t)pthread_self());
 	HttpResponse rsps(sockfd, rqst.getUri());
 	rsps.response_file();
 	close(sockfd); 

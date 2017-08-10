@@ -88,6 +88,7 @@ HttpRequest::HttpRequest(const char* _data):pct(NULL){
 
     // 初始化Request请求包
     pct = new RequestPacket(_data);
+    // log_info("\n%s", _data);
 }
 
 HttpRequest::HttpRequest():pct(NULL){
@@ -99,14 +100,28 @@ HttpRequest::~HttpRequest(){
 }
 
 int HttpRequest::readData(const int fd){
-    char data[4096];
+    char data[4096] = {0};
+    int size = 0;
+    int len = 0;
 
-    int size = read(fd, data, 4096);
-    //log_info("%d\n%s", size, data);
-    if(size == 0 || size == -1) 
-        return size;
-    data[size] = '\0';
+    // while(true) {
+        len = read(fd, data + size, 4096);
+        // if(len == -1){
+        //     if(errno == EAGAIN)
+        //         continue;
+        //     else {
+        //         close(fd);
+        //         return -1;
+        //     }
+        // }
+        // if(len == 0){
+        //     break;
+        // }
+        size += len;
+    // }
+    
     pct = new RequestPacket(data);
+    log_info("from socket:%d read data size: %d", fd, size); 
     return size;
 }
 
@@ -154,15 +169,17 @@ map<string, string> HttpRequest::getParameterMap(){
 
 
 HttpResponse::HttpResponse(int _fd, const string& _path):HttpResponse(_fd, _path.c_str()){
-
+    
 }
 
-HttpResponse::HttpResponse(int _fd, const char* _path){
+HttpResponse::HttpResponse(int _fd, const char* _path){   
     fd = _fd;
     path = "./web" + string(_path);
     
     if(path == "./web/")
         path += "index.html";
+
+    log_info("request: %s", path.c_str());
 }
 
 HttpResponse::~HttpResponse(){
@@ -190,11 +207,10 @@ void HttpResponse::response_404(){
     char buf[4096];
     int count = 0;
 
+    log_info("response: 404");
     FILE* txt = fopen("./web/404.html", "r");
     check(txt == NULL, "open file fail");
 
-    
-    // printf("----------------------");
     head  = "HTTP/1.1 404 Not Found\r\n";
 	head += "Server: Mini_Server\r\n";
 	head += "Content-Type: text/html; charset=UTF-8\r\n";
@@ -225,7 +241,6 @@ void HttpResponse::response_200(){
 
     FILE* txt = fopen(path.c_str(), "r");
     check(txt == NULL, "open file fail");
-    
 
     while(!feof(txt) && fgets(buf, sizeof(buf), txt)){
         count += strlen(buf);
@@ -241,4 +256,5 @@ void HttpResponse::response_200(){
 
     write(fd, head.c_str(), head.length());
     write(fd, content.c_str(), content.length());
+    fclose(txt);
 }
